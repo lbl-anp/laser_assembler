@@ -9,11 +9,11 @@
  *  modification, are permitted provided that the following conditions
  *  are met:
  *
- *   1. Redistributions of source code must retain the above 
+ *   1. Redistributions of source code must retain the above
  *      copyright notice, this list of conditions and the following
  *      disclaimer.
  *
- *   2. Redistributions in binary form must reproduce the above 
+ *   2. Redistributions in binary form must reproduce the above
  *      copyright notice, this list of conditions and the following
  *      disclaimer in the documentation and/or other materials provided
  *      with the distribution.
@@ -32,7 +32,7 @@
  *  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
  *  OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
  *  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
- *  OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
+ *  OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  *  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  *
@@ -101,13 +101,13 @@ namespace laser_assembler
       /** \brief Fills-up index holes in an organized point cloud
        *
        * \param data_count The current index of the bytebuffer of the point cloud 2, the value will be modified
-       * \param pc The output PointCloud2 object 
+       * \param pc The output PointCloud2 object
        * \param index the current scan ray index which will be insertet, the value will be modified
        * \param previous_index the previous read scan ray index
        * \param point_step The step of one combined field in bytes in the buffer
        * \param fields A vector of all fields
        * \param idx_offset The byte offset of one scan ray index
-       * \param idx_datatype The type of one scan ray index 
+       * \param idx_datatype The type of one scan ray index
        */
       inline void fillUpIndexHoles(unsigned int& data_count,
           sensor_msgs::PointCloud2 &pc,
@@ -126,7 +126,7 @@ namespace laser_assembler
        */
       bool hasEqualScanHeader(sensor_msgs::PointCloud2 &first_scan, sensor_msgs::PointCloud2 &current_scan);
 
-      //! \enables the organized mode. 
+      //! \enables the organized mode.
       bool organized;
   } ;
 
@@ -140,7 +140,7 @@ namespace laser_assembler
       std::string build_cloud2_service_name = ros::names::resolve("build_cloud2");
       std::string assemble_scans2_service_name = ros::names::resolve("assemble_scans2");
       build_cloud_server2_    = BaseAssembler<T, sensor_msgs::PointCloud2>::n_.advertiseService("build_cloud2", &PointCloud2BaseAssembler<T>::buildCloud2,    this);
-      assemble_scans_server2_ = BaseAssembler<T, sensor_msgs::PointCloud2>::n_.advertiseService("assemble_scans2", &PointCloud2BaseAssembler<T>::assembleScans2, this); 
+      assemble_scans_server2_ = BaseAssembler<T, sensor_msgs::PointCloud2>::n_.advertiseService("assemble_scans2", &PointCloud2BaseAssembler<T>::assembleScans2, this);
     }
 
   template <class T>
@@ -189,12 +189,12 @@ namespace laser_assembler
           return &fields[i];
         }
       }
-      return 0; 
+      return 0;
     }
   template <class T>
     void PointCloud2BaseAssembler<T>::fillUpIndexHoles(unsigned int& data_count, sensor_msgs::PointCloud2 &pc, int& previous_index, int index, const unsigned int point_step, const std::vector<sensor_msgs::PointField>& fields, const unsigned int idx_offset, const unsigned int idx_type)
     {
-      
+
       // fill up for not existing indices
       while(previous_index + this->downsample_factor_ < index){
         for (unsigned int chan_ind = 0; chan_ind < fields.size(); chan_ind++)
@@ -229,7 +229,7 @@ namespace laser_assembler
   template <class T>
     bool PointCloud2BaseAssembler<T>::assembleScans2Organized(AssembleScans2::Request& req, AssembleScans2::Response& resp)
     {
-      this->scan_hist_mutex_.lock();  
+      this->scan_hist_mutex_.lock();
       // Determine where in our history we actually are
       unsigned int i = 0 ;
 
@@ -255,7 +255,7 @@ namespace laser_assembler
           this->scan_hist_[i].header.stamp < req.end )                // Don't go past the end-time of the request
       {
         sensor_msgs::PointCloud2& current_scan = this->scan_hist_[i];
-        unsigned int pts_count = this->GetPointsInScan(current_scan) ; 
+        unsigned int pts_count = this->GetPointsInScan(current_scan) ;
         if(pts_count>0)
         {
           unsigned int pts_step = current_scan.point_step ;
@@ -364,7 +364,7 @@ namespace laser_assembler
   template <class T>
     bool PointCloud2BaseAssembler<T>::assembleScans2Unorganized(AssembleScans2::Request& req, AssembleScans2::Response& resp)
     {
-      this->scan_hist_mutex_.lock();  
+      this->scan_hist_mutex_.lock();
       // Determine where in our history we actually are
       unsigned int i = 0 ;
 
@@ -384,7 +384,7 @@ namespace laser_assembler
           this->scan_hist_[i].header.stamp < req.end )                // Don't go past the end-time of the request
       {
         sensor_msgs::PointCloud2& current_scan = this->scan_hist_[i];
-        unsigned int pts_count = this->GetPointsInScan(current_scan) ; 
+        unsigned int pts_count = this->GetPointsInScan(current_scan) ;
         unsigned int pts_downsampled = (pts_count+this->downsample_factor_-1)/this->downsample_factor_ ;
         req_pts += pts_downsampled;
         i += this->downsample_factor_ ;
@@ -427,7 +427,7 @@ namespace laser_assembler
         unsigned int data_count = 0;
 
         bool is_dense = true;
-        int max_bytes = req_pts * point_step; 
+        int max_bytes = req_pts * point_step;
         for (i=start_index; i<past_end_index; i+= this->downsample_factor_)
         {
           sensor_msgs::PointCloud2& current_scan = this->scan_hist_[i];

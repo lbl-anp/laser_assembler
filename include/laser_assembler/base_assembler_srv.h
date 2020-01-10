@@ -208,8 +208,8 @@ void BaseAssemblerSrv<T>::start()
     ROS_ERROR("assembler::start() was called twice!. This is bad, and could leak memory") ;
   else
   {
-    scan_sub_.subscribe(n_, "scan_in", 10);
-    tf_filter_ = new tf::MessageFilter<T>(scan_sub_, *tf_, fixed_frame_, 10);
+    scan_sub_.subscribe(n_, "scan_in", max_scans_);
+    tf_filter_ = new tf::MessageFilter<T>(scan_sub_, *tf_, fixed_frame_, max_scans_);
     tf_filter_->setTolerance(ros::Duration(tf_tolerance_secs_));
     tf_filter_->registerCallback( boost::bind(&BaseAssemblerSrv<T>::scansCallback, this, _1) );
   }

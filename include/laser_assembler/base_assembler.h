@@ -120,7 +120,7 @@ private:
 
   //! \brief The max number of scans to store in the scan history
   unsigned int max_scans_ ;
-  
+
   //! \brief The number of scans to skip continuously
   unsigned int skip_scans_, skip_;
 
@@ -186,8 +186,8 @@ void BaseAssembler<T, V>::start(const std::string& in_topic_name)
     ROS_ERROR("assembler::start() was called twice!. This is bad, and could leak memory") ;
   else
   {
-    scan_sub_.subscribe(n_, in_topic_name, 10);
-    tf_filter_ = new tf::MessageFilter<T>(scan_sub_, *tf_, fixed_frame_, 10);
+    scan_sub_.subscribe(n_, in_topic_name, max_scans_);
+    tf_filter_ = new tf::MessageFilter<T>(scan_sub_, *tf_, fixed_frame_, max_scans_);
     tf_filter_->registerCallback( boost::bind(&BaseAssembler<T, V>::msgCallback, this, _1) );
   }
 }
@@ -200,8 +200,8 @@ void BaseAssembler<T, V>::start()
     ROS_ERROR("assembler::start() was called twice!. This is bad, and could leak memory") ;
   else
   {
-    scan_sub_.subscribe(n_, "bogus", 10);
-    tf_filter_ = new tf::MessageFilter<T>(scan_sub_, *tf_, fixed_frame_, 10);
+    scan_sub_.subscribe(n_, "bogus", max_scans_);
+    tf_filter_ = new tf::MessageFilter<T>(scan_sub_, *tf_, fixed_frame_, max_scans_);
     tf_filter_->registerCallback( boost::bind(&BaseAssembler<T, V>::msgCallback, this, _1) );
   }
 }
@@ -218,7 +218,7 @@ BaseAssembler<T, V>::~BaseAssembler()
 template <class T, class V>
 void BaseAssembler<T, V>::msgCallback(const boost::shared_ptr<const T>& scan_ptr)
 {
-  
+
   // skip a certain number of scans
   if(skip_scans_ > 0){
     if(skip_ > 0){

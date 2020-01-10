@@ -9,11 +9,11 @@
  *  modification, are permitted provided that the following conditions
  *  are met:
  *
- *   1. Redistributions of source code must retain the above 
+ *   1. Redistributions of source code must retain the above
  *      copyright notice, this list of conditions and the following
  *      disclaimer.
  *
- *   2. Redistributions in binary form must reproduce the above 
+ *   2. Redistributions in binary form must reproduce the above
  *      copyright notice, this list of conditions and the following
  *      disclaimer in the documentation and/or other materials provided
  *      with the distribution.
@@ -32,7 +32,7 @@
  *  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
  *  OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
  *  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
- *  OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
+ *  OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  *  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  *
@@ -81,17 +81,33 @@ public:
     sensor_msgs::PointCloud2& cloud_in, sensor_msgs::PointCloud2& cloud_out)
   {
 
-    std::string error_msg;
-    bool success = this->tf_->waitForTransform(fixed_frame_id, cloud_in.header.frame_id, cloud_in.header.stamp,
-        ros::Duration(0.1), ros::Duration(0.01), &error_msg);
-    if (!success)
-    {
-      ROS_WARN("Could not get transform! %s", error_msg.c_str());
-      return;
-    }
+    // std::string error_msg;
+    // bool success = this->tf_->waitForTransform(fixed_frame_id, cloud_in.header.frame_id, cloud_in.header.stamp,
+    //     ros::Duration(0.1), ros::Duration(0.01), &error_msg);
+    // if (!success)
+    // {
+    //   ROS_WARN("Could not get transform! %s", error_msg.c_str());
+    //   return;
+    // }
+    //
+    // tf::StampedTransform transform;
+    // this->tf_->lookupTransform(fixed_frame_id, cloud_in.header.frame_id,  cloud_in.header.stamp, transform);
+    // geometry_msgs::TransformStamped tf_msg;
+    // tf::transformStampedTFToMsg(transform, tf_msg);
+    // tf2::doTransform(cloud_in, cloud_out, tf_msg);
 
+    // --
+    // DH: 1. Waiting for tf and skipping if it never arrives (done above) results in propeller effect
+    //        when trying to transofrm into map frame very fast.
+    //     2. My solution is to just use the latest tf every time (calling lookupTransform at time 0).
+    //        Performs well for MURS (2x 16-beam lidar spinning at 600 rpm / 10 Hz with packet dump rate of ~75/sweep).
+    //        I am testing aggregating 2 sweeps of each lidar (~300 clouds at 5 Hz)
+    //
+    // Transform docs:
+    // http://docs.ros.org/indigo/api/tf/html/c++/classtf_1_1Transformer.html#ac01a9f8709a828c427f1a5faa0ced42b
+    //
     tf::StampedTransform transform;
-    this->tf_->lookupTransform(fixed_frame_id, cloud_in.header.frame_id,  cloud_in.header.stamp, transform);
+    this->tf_->lookupTransform(fixed_frame_id, cloud_in.header.frame_id,  ros::Time(0), transform);
     geometry_msgs::TransformStamped tf_msg;
     tf::transformStampedTFToMsg(transform, tf_msg);
     tf2::doTransform(cloud_in, cloud_out, tf_msg);
