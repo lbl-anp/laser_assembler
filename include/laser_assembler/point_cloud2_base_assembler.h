@@ -55,6 +55,8 @@
 // Service
 #include "laser_assembler/AssembleScans2.h"
 
+
+
 namespace laser_assembler
 {
 
@@ -82,7 +84,7 @@ namespace laser_assembler
        * \param scan_in The scan that we want to convert
        * \param cloud_out The result of transforming scan_in into a cloud in frame fixed_frame_id
        */
-      virtual void Convert(const std::string& fixed_frame_id, const T& scan_in, sensor_msgs::PointCloud2& cloud_out) = 0 ;
+      virtual void Convert(const std::string& fixed_frame_id, const T& scan_in, sensor_msgs::PointCloud2& cloud_out, const bool& use_latest_tf) = 0 ;
 
     private:
       // ROS Input/Ouptut Handling

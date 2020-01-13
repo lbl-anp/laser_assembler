@@ -65,7 +65,7 @@ public:
     return (scan.points.size ());
   }
 
-  void Convert(const string& fixed_frame_id, const sensor_msgs::PointCloud& scan_in, sensor_msgs::PointCloud& cloud_out)
+  void Convert(const string& fixed_frame_id, const sensor_msgs::PointCloud& scan_in, sensor_msgs::PointCloud& cloud_out, const bool& use_latest_tf)
   {
     tf_->transformPointCloud(fixed_frame_id, scan_in, cloud_out) ;
     return ;

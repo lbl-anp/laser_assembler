@@ -78,7 +78,7 @@ public:
     return (scan.ranges.size ());
   }
 
-  void Convert(const string& fixed_frame_id, const sensor_msgs::LaserScan& scan_in, sensor_msgs::PointCloud& cloud_out)
+  void Convert(const string& fixed_frame_id, const sensor_msgs::LaserScan& scan_in, sensor_msgs::PointCloud& cloud_out, const bool& use_latest_tf)
   {
     // apply filters on laser scan
     filter_chain_.update (scan_in, scan_filtered_);

@@ -135,6 +135,8 @@ private:
   //! \brief The frame to transform data into upon receipt
   std::string fixed_frame_ ;
 
+  bool use_latest_tf_ ;
+
   //! \brief How long we should wait before processing the input data. Very useful for laser scans.
   double tf_tolerance_secs_ ;
 
@@ -173,6 +175,10 @@ BaseAssemblerSrv<T>::BaseAssemblerSrv() : private_ns_("~")
   ROS_INFO("Fixed Frame: %s", fixed_frame_.c_str()) ;
   if (fixed_frame_ == "ERROR_NO_NAME")
     ROS_ERROR("Need to set parameter fixed_frame") ;
+
+  //
+  private_ns_.param("use_latest_tf", use_latest_tf_, false);
+  ROS_INFO("Use latest tf: %d", use_latest_tf_) ;
 
   // ***** Set downsample_factor *****
   int tmp_downsample_factor ;

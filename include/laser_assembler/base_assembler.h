@@ -90,7 +90,7 @@ public:
    * \param scan_in The scan that we want to convert
    * \param cloud_out The result of transforming scan_in into a cloud in frame fixed_frame_id
    */
-  virtual void Convert(const std::string& fixed_frame_id, const T& scan_in, V& cloud_out) = 0 ;
+  virtual void Convert(const std::string& fixed_frame_id, const T& scan_in, V& cloud_out, const bool& use_latest_tf) = 0 ;
 
 protected:
   tf::TransformListener* tf_ ;
@@ -105,6 +105,8 @@ protected:
 
   //! \brief The frame to transform data into upon receipt
   std::string fixed_frame_ ;
+
+  bool use_latest_tf_ ;
 
   //! \brief Specify how much to downsample the data. A value of 1 preserves all the data. 3 would keep 1/3 of the data.
   unsigned int downsample_factor_ ;
@@ -160,6 +162,10 @@ BaseAssembler<T, V>::BaseAssembler(const std::string& max_size_param_name) : pri
   ROS_INFO("Fixed Frame: %s", fixed_frame_.c_str()) ;
   if (fixed_frame_ == "ERROR_NO_NAME")
     ROS_ERROR("Need to set parameter fixed_frame") ;
+
+  //
+  private_ns_.param("use_latest_tf", use_latest_tf_, false);
+  ROS_INFO("Use latest tf: %d", use_latest_tf_) ;
 
   // ***** Set downsample_factor *****
   int tmp_downsample_factor ;
@@ -237,7 +243,7 @@ void BaseAssembler<T, V>::msgCallback(const boost::shared_ptr<const T>& scan_ptr
   // Convert the scan data into a universally known datatype: PointCloud
   try
   {
-    Convert(fixed_frame_, scan, cur_cloud) ;              // Convert scan into V
+    Convert(fixed_frame_, scan, cur_cloud, use_latest_tf_) ;              // Convert scan into V
   }
   catch(tf::TransformException& ex)
   {
