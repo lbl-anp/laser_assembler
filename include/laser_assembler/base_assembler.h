@@ -116,6 +116,8 @@ private:
   message_filters::Subscriber<T> scan_sub_;
   message_filters::Connection tf_filter_connection_;
 
+  ros::Subscriber sub;
+
   //! \brief Callback function for every time we receive a new scan
   //void scansCallback(const tf::MessageNotifier<T>::MessagePtr& scan_ptr, const T& testA)
   virtual void msgCallback(const boost::shared_ptr<const T>& scan_ptr) ;
@@ -192,9 +194,10 @@ void BaseAssembler<T, V>::start(const std::string& in_topic_name)
     ROS_ERROR("assembler::start() was called twice!. This is bad, and could leak memory") ;
   else
   {
-    scan_sub_.subscribe(n_, in_topic_name, max_scans_);
-    tf_filter_ = new tf::MessageFilter<T>(scan_sub_, *tf_, fixed_frame_, max_scans_);
-    tf_filter_->registerCallback( boost::bind(&BaseAssembler<T, V>::msgCallback, this, _1) );
+    sub = n_.subscribe(in_topic_name, max_scans_, &BaseAssembler<T, V>::msgCallback, this);
+    //scan_sub_.subscribe(n_, in_topic_name, max_scans_);
+    //tf_filter_ = new tf::MessageFilter<T>(scan_sub_, *tf_, fixed_frame_, max_scans_);
+    //tf_filter_->registerCallback( boost::bind(&BaseAssembler<T, V>::msgCallback, this, _1) );
   }
 }
 
@@ -206,9 +209,10 @@ void BaseAssembler<T, V>::start()
     ROS_ERROR("assembler::start() was called twice!. This is bad, and could leak memory") ;
   else
   {
-    scan_sub_.subscribe(n_, "bogus", max_scans_);
-    tf_filter_ = new tf::MessageFilter<T>(scan_sub_, *tf_, fixed_frame_, max_scans_);
-    tf_filter_->registerCallback( boost::bind(&BaseAssembler<T, V>::msgCallback, this, _1) );
+    sub = n_.subscribe("bogus", max_scans_, &BaseAssembler<T, V>::msgCallback, this);
+    //scan_sub_.subscribe(n_, "bogus", max_scans_, &BaseAssembler<T, V>::msgCallback);
+    //tf_filter_ = new tf::MessageFilter<T>(scan_sub_, *tf_, fixed_frame_, max_scans_);
+    //tf_filter_->registerCallback( boost::bind(&BaseAssembler<T, V>::msgCallback, this, _1) );
   }
 }
 

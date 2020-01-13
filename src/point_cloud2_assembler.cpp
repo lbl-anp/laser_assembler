@@ -80,18 +80,17 @@ public:
   void Convert(const string& fixed_frame_id, const sensor_msgs::PointCloud2& cloud_in, sensor_msgs::PointCloud2& cloud_out, const bool& use_latest_tf)
   {
 
-	ros::Time tf_t = cloud_in.header.stamp;
-  	tf::StampedTransform transform;
-  	geometry_msgs::TransformStamped tf_msg;
+    ros::Time tf_t = cloud_in.header.stamp;
+    tf::StampedTransform transform;
+    geometry_msgs::TransformStamped tf_msg;
 
-	if (use_latest_tf){
-		tf_t = ros::Time(0);
-	}
+    if (use_latest_tf){
+        tf_t = ros::Time(0);
+    }
 
-	this->tf_->lookupTransform(fixed_frame_id, cloud_in.header.frame_id,  tf_t, transform);
+    this->tf_->lookupTransform(fixed_frame_id, cloud_in.header.frame_id,  tf_t, transform);
     tf::transformStampedTFToMsg(transform, tf_msg);
     tf2::doTransform(cloud_in, cloud_out, tf_msg);
-
   }
 
 private:
