@@ -114,6 +114,8 @@ private:
   tf::MessageFilter<T>* tf_filter_;
   message_filters::Connection tf_filter_connection_;
 
+  ros::Subscriber sub;
+
   //! \brief Callback function for every time we receive a new scan
   //void scansCallback(const tf::MessageNotifier<T>::MessagePtr& scan_ptr, const T& testA)
   void scansCallback(const boost::shared_ptr<const T>& scan_ptr) ;
@@ -189,7 +191,7 @@ BaseAssemblerSrv<T>::BaseAssemblerSrv() : private_ns_("~")
   cloud_srv_server_ = private_ns_.advertiseService("build_cloud", &BaseAssemblerSrv<T>::buildCloud, this);
 
   // **** Get the TF Notifier Tolerance ****
-  private_ns_.param("tf_tolerance_secs", tf_tolerance_secs_, 0.0);
+  private_ns_.param("tf_tolerance_secs", tf_tolerance_secs_, 1.0);
   if (tf_tolerance_secs_ < 0)
     ROS_ERROR("Parameter tf_tolerance_secs<0 (%f)", tf_tolerance_secs_) ;
   ROS_INFO("tf Tolerance: %f seconds", tf_tolerance_secs_) ;
@@ -208,10 +210,11 @@ void BaseAssemblerSrv<T>::start()
     ROS_ERROR("assembler::start() was called twice!. This is bad, and could leak memory") ;
   else
   {
-    scan_sub_.subscribe(n_, "scan_in", max_scans_);
-    tf_filter_ = new tf::MessageFilter<T>(scan_sub_, *tf_, fixed_frame_, max_scans_);
-    tf_filter_->setTolerance(ros::Duration(tf_tolerance_secs_));
-    tf_filter_->registerCallback( boost::bind(&BaseAssemblerSrv<T>::scansCallback, this, _1) );
+    sub = n_.subscribe("scan_in", max_scans_, &BaseAssemblerSrv<T>::scansCallback, this);
+    // scan_sub_.subscribe(n_, "scan_in", max_scans_);
+    // tf_filter_ = new tf::MessageFilter<T>(scan_sub_, *tf_, fixed_frame_, max_scans_);
+    // tf_filter_->setTolerance(ros::Duration(tf_tolerance_secs_));
+    // tf_filter_->registerCallback( boost::bind(&BaseAssemblerSrv<T>::scansCallback, this, _1) );
   }
 }
 

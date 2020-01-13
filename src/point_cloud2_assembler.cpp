@@ -81,36 +81,27 @@ public:
     sensor_msgs::PointCloud2& cloud_in, sensor_msgs::PointCloud2& cloud_out)
   {
 
-    // std::string error_msg;
-    // bool success = this->tf_->waitForTransform(fixed_frame_id, cloud_in.header.frame_id, cloud_in.header.stamp,
-    //     ros::Duration(0.1), ros::Duration(0.01), &error_msg);
-    // if (!success)
-    // {
-    //   ROS_WARN("Could not get transform! %s", error_msg.c_str());
-    //   return;
-    // }
-    //
-    // tf::StampedTransform transform;
-    // this->tf_->lookupTransform(fixed_frame_id, cloud_in.header.frame_id,  cloud_in.header.stamp, transform);
-    // geometry_msgs::TransformStamped tf_msg;
-    // tf::transformStampedTFToMsg(transform, tf_msg);
-    // tf2::doTransform(cloud_in, cloud_out, tf_msg);
-
-    // --
     // DH: 1. Waiting for tf and skipping if it never arrives (done above) results in propeller effect
     //        when trying to transofrm into map frame very fast.
-    //     2. My solution is to just use the latest tf every time (calling lookupTransform at time 0).
+    //     2. My solution is to just use the latest tf (calling lookupTransform at time 0) if the waitForTransform fails.
     //        Performs well for MURS (2x 16-beam lidar spinning at 600 rpm / 10 Hz with packet dump rate of ~75/sweep).
     //        I am testing aggregating 2 sweeps of each lidar (~300 clouds at 5 Hz)
     //
     // Transform docs:
     // http://docs.ros.org/indigo/api/tf/html/c++/classtf_1_1Transformer.html#ac01a9f8709a828c427f1a5faa0ced42b
     //
-    tf::StampedTransform transform;
-    this->tf_->lookupTransform(fixed_frame_id, cloud_in.header.frame_id,  ros::Time(0), transform);
-    geometry_msgs::TransformStamped tf_msg;
-    tf::transformStampedTFToMsg(transform, tf_msg);
-    tf2::doTransform(cloud_in, cloud_out, tf_msg);
+	ros::Time t_tf = cloud_in.header.stamp;
+	//bool success = this->tf_->waitForTransform(fixed_frame_id, cloud_in.header.frame_id, t_tf, ros::Duration(0.0000001));
+	bool success = this->tf_->canTransform(fixed_frame_id, cloud_in.header.frame_id, t_tf);
+	if (!success){
+	  ROS_WARN("Could not get requested transform - Using latest TF instead");
+	  t_tf = ros::Time(0);
+	}
+	tf::StampedTransform transform;
+	this->tf_->lookupTransform(fixed_frame_id, cloud_in.header.frame_id,  t_tf, transform);
+	geometry_msgs::TransformStamped tf_msg;
+	tf::transformStampedTFToMsg(transform, tf_msg);
+	tf2::doTransform(cloud_in, cloud_out, tf_msg);
   }
 
 private:
